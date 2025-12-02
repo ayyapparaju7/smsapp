@@ -1,0 +1,19 @@
+package com.example.smsbulk
+
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
+
+
+class SmsSentReceiver : BroadcastReceiver() {
+override fun onReceive(context: Context?, intent: Intent?) {
+val res = resultCode
+val msg = when (res) {
+android.app.Activity.RESULT_OK -> "SENT"
+else -> "SENT_FAILED ($res)"
+}
+Toast.makeText(context, "SMS status: $msg", Toast.LENGTH_SHORT).show()
+}
+}
