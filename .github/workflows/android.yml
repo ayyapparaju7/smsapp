@@ -13,14 +13,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '11'
+          java-version: '17'
 
-      - name: Download Android SDK
+      - name: Verify Java
+        run: java -version
+
+      - name: Download Android SDK command-line tools
         uses: android-actions/setup-android@v2
+        # The action may warn about extra inputs but it's OK.
         with:
           api-level: 34
           build-tools: "34.0.0"
