@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     steps:
       - name: Checkout repository
@@ -24,16 +26,30 @@ jobs:
 
       - name: Download Android SDK command-line tools
         uses: android-actions/setup-android@v2
-        # The action may warn about extra inputs but it's OK.
         with:
           api-level: 34
           build-tools: "34.0.0"
 
-      - name: Grant execute for gradlew
-        run: chmod +x ./gradlew
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Ensure Gradle wrapper exists (generate if missing) and build
+        run: |
+          set -euo pipefail
+          # If gradlew missing, install system gradle and generate wrapper
+          if [ ! -f "./gradlew" ]; then
+            echo "No gradlew found — installing gradle and generating wrapper..."
+            sudo apt-get update -y
+            sudo apt-get install -y wget unzip zip tar
+            # Install a reasonably new gradle binary from apt (or use SDKMAN alternative)
+            sudo apt-get install -y gradle
+            # Generate the wrapper (choose a Gradle version compatible with Android Gradle Plugin)
+            gradle wrapper --gradle-version 8.1.1
+          fi
+          chmod +x ./gradlew
+          # Optional: show Gradle version
+          ./gradlew --version
+          # Build debug APK
+          ./gradlew assembleDebug --no-daemon --stacktrace
+        # Increase timeout in case network is slow
+        timeout-minutes: 30
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
